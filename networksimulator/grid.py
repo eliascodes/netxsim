@@ -1,0 +1,65 @@
+from abc import ABCMeta, abstractmethod
+import itertools as itt
+
+
+class AbstractGrid(object):
+    """docstring for AbstractGrid"""
+    def __init__(self):
+        pass
+
+
+class Grid(AbstractGrid):
+    """"""
+    def __init__(self):
+        super().__init__()
+        self.grid = {}
+        self.meta = {}
+
+    def __eq__(self, other):
+        return self.grid == other.grid and self.meta == other.meta
+
+    def add_dimension(self, name, points, description=None):
+        self.grid[name] = points
+        self.meta[name] = description
+        return self
+
+    def add_description(self, name, description):
+        self.meta[name] = description
+        return self
+
+    def _subgrid(self, filt, kwargs):
+        grid_new = type(self)()
+        for name in kwargs:
+            grid_new.add_dimension(name, filt(self.grid[name], kwargs[name]))
+        return grid_new
+
+    def subgrid_from_range(self, **kwargs):
+        return self._subgrid(
+                            lambda pts, inputs: pts[inputs[0]:inputs[1]],
+                            kwargs
+                            )
+
+    def subgrid_from_indices(self, **kwargs):
+        return self._subgrid(
+                            lambda pts, inputs: [pts[ii] for ii in inputs],
+                            kwargs
+                            )
+
+    def subgrid_from_values(self, **kwargs):
+        return self._subgrid(
+                            lambda pts, inputs: [pt for pt in pts if pt in inputs],
+                            kwargs
+                            )
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        names = list(self.grid.keys())
+        grid = list(self.grid.values())
+        grid = list(itt.product(*grid))
+        for point in grid:
+            out = {}
+            for ii in range(0, len(names)):
+                out[name[ii]] = point[ii]
+            yield out

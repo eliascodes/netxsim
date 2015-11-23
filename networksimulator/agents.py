@@ -36,5 +36,5 @@ class DeterministicAgent(AbstractAgent):
 
 class StochasticAgent(AbstractAgent):
     """"""
-    def __init__(self):
-        pass
+    def __init__(self, agent_id):
+        super().__init__(agent_id)
