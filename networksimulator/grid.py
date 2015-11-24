@@ -18,6 +18,16 @@ class Grid(AbstractGrid):
     def __eq__(self, other):
         return self.grid == other.grid and self.meta == other.meta
 
+    def __iter__(self):
+        names = list(self.grid.keys())
+        grid = list(self.grid.values())
+        grid = list(itt.product(*grid))
+        for point in grid:
+            out = {}
+            for ii in range(0, len(names)):
+                out[names[ii]] = point[ii]
+            yield out
+
     def add_dimension(self, name, points, description=None):
         self.grid[name] = points
         self.meta[name] = description
@@ -50,16 +60,3 @@ class Grid(AbstractGrid):
                             lambda pts, inputs: [pt for pt in pts if pt in inputs],
                             kwargs
                             )
-
-    def __iter__(self):
-        return self
-
-    def next(self):
-        names = list(self.grid.keys())
-        grid = list(self.grid.values())
-        grid = list(itt.product(*grid))
-        for point in grid:
-            out = {}
-            for ii in range(0, len(names)):
-                out[name[ii]] = point[ii]
-            yield out
