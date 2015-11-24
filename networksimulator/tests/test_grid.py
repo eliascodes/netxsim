@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from networksimulator.grid import Grid
+import itertools as itt
 
 
 def test_create_grid():
@@ -40,3 +41,12 @@ def test_create_subgrid_from_grid():
     assert(h == h_exp)
     assert(k == k_exp)
     assert(l == l_exp)
+
+
+def test_iteration():
+    g = Grid().add_dimension('x', range(0, 3)).add_dimension('y', range(0, 4))
+    points_full = list(itt.product([0, 1, 2], [0, 1, 2, 3]))
+    for point in g:
+        assert(point['x'] in range(0, 3))
+        assert(point['y'] in range(0, 4))
+        assert((point['x'], point['y']) in points_full)
