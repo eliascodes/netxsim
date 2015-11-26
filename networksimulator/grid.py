@@ -21,11 +21,8 @@ class Grid(AbstractGrid):
     def __iter__(self):
         names = list(self.grid.keys())
         grid = list(self.grid.values())
-        grid = list(itt.product(*grid))
-        for point in grid:
-            out = {}
-            for ii in range(0, len(names)):
-                out[names[ii]] = point[ii]
+        for point in itt.product(*grid):
+            out = {names[ii]: point[ii] for ii in range(0, len(names))}
             yield out
 
     def add_dimension(self, name, points, description=None):
@@ -60,3 +57,6 @@ class Grid(AbstractGrid):
                             lambda pts, inputs: [pt for pt in pts if pt in inputs],
                             kwargs
                             )
+
+    def number_of_dimensions(self):
+        return len(self.grid.keys())
