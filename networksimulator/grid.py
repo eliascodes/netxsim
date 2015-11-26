@@ -1,17 +1,9 @@
-from abc import ABCMeta, abstractmethod
 import itertools as itt
 
 
-class AbstractGrid(object):
-    """docstring for AbstractGrid"""
-    def __init__(self):
-        pass
-
-
-class Grid(AbstractGrid):
+class Grid(object):
     """"""
     def __init__(self):
-        super().__init__()
         self.grid = {}
         self.meta = {}
 
