@@ -1,20 +1,32 @@
-from abc import ABCMeta, abstractmethod
-import numpy as np
+from networkx import Graph
 
 
-class AbstractBuilder(object):
+class BaseGraphBuilder(object):
     """"""
-    __metaclass__ = ABCMeta
+
+    _attr_teardown = {}
 
     def __init__(self):
         pass
 
-    @abstractmethod
-    def build(self):
+    def set(self, **kwargs):
+        for key in kwargs:
+            setattr(key, kwargs[key])
+            self._attr_teardown[key] = None
+
+    def build(self, **kwargs):
+        self._prepare_build(**kwargs)
+        result = self._construct(**kwargs)
+        self._teardown_build(**kwargs)
+        return result
+
+    def _prepare_build(self, **kwargs):
         pass
 
+    def _construct(self, **kwargs):
+        return Graph()
 
-class GraphBuilder(AbstractBuilder):
-    """"""
-    def __init__(self):
-        super().__init__()
+    def _teardown_build(self, **kwargs):
+        for key in self._attr_teardown:
+            delattr(self, key)
+        self._attr_teardown = {}
