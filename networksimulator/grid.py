@@ -34,21 +34,27 @@ class Grid(object):
 
     def subgrid_from_range(self, **kwargs):
         return self._subgrid(
-                            lambda pts, inputs: pts[inputs[0]:inputs[1]],
-                            kwargs
-                            )
+            lambda pts, inputs: pts[inputs[0]:inputs[1]],
+            kwargs
+        )
 
     def subgrid_from_indices(self, **kwargs):
         return self._subgrid(
-                            lambda pts, inputs: [pts[ii] for ii in inputs],
-                            kwargs
-                            )
+            lambda pts, inputs: [pts[ii] for ii in inputs],
+            kwargs
+        )
 
     def subgrid_from_values(self, **kwargs):
         return self._subgrid(
-                            lambda pts, inputs: [pt for pt in pts if pt in inputs],
-                            kwargs
-                            )
+            lambda pts, inputs: [pt for pt in pts if pt in inputs],
+            kwargs
+        )
+
+    def subgrid_from_dimensions(self, *args):
+        return self._subgrid(
+            lambda pts, inputs: pts,
+            {k: None for k in args}
+        )
 
     def number_of_dimensions(self):
         return len(self.grid.keys())
