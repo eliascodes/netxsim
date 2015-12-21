@@ -1,12 +1,11 @@
-from abc import ABCMeta, abstractmethod
 from numpy.random import RandomState
-from networksimulator import agents
+from . import agents
 
 
 class AgentGenerator(object):
     """"""
     def __init__(self, agent_type):
-        if issubclass(agent_type, agents.AbstractAgent):
+        if issubclass(agent_type, agents.BaseAgent):
             self.agent_type = agent_type
         else:
             raise TypeError("Input must be an Agent type")
@@ -24,18 +23,20 @@ class AgentGenerator(object):
 class AttributeGenerator(object):
     """"""
     def __init__(self, seed):
+        if seed is None:
+            seed = 0
         self.rng = RandomState(seed)
         self.attr_deterministic = {}
         self.attr_stochastic = {}
         self._frozen = False
 
-    def set_deterministic(self, attr, value):
+    def set_deterministic(self, attr, value):  # TODO change to kwargs
         if self._frozen:
             raise BaseException("Frozen")
         self.attr_deterministic[attr] = value
         return self
 
-    def set_stochastic(self, attr, distribution=None, arguments=None):
+    def set_stochastic(self, attr, distribution=None, arguments=None):  # TODO change to kwargs
         if self._frozen:
             raise BaseException("Frozen")
         elif distribution is not None and arguments is not None:
