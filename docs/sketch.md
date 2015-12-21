@@ -84,12 +84,26 @@ import netsim.simulator as sim
 grid = case001.grid_builder()
 logger = case001.logging()
 
-simObj = sim.Simulator(grid, case001.graph_builder(), logger)
+simObj = sim.Simulator(grid, case001.graph_builder, logger)
 simObj.runAll()
 or
-simObj.run(grid.points([0,1,2], [33,2,20]))
+simObj = sim.Simulator(grid.subgrid_from_values(x=[0,1,2], y=[33,2,20]), case001.graph_builder, logger)
 or
-simObj.run(grid.points({'dim1': range(0,20), 'dim2': range(32,1000), 'dim3': [1,231,22]}))
+simObj = sim.Simulator(grid.subgrid_from_range(x=range(0,20), y=range(32,1000), z=[1,231,22]), case001.graph_builder, logger)
+
+Environment should be recreated for each case/trial/point
+def runAll():
+    for point in grid:
+        graph = self.build_graph(point)
+        env = self.init_env(graph)
+        l = logger(env).start()
+        env.run(until=runtime)
+        results = l.stop().get_results()
+        results.save(path)
+        if self.verbose:
+            self.print(results)
+    return self.success
+
 
 Sketch:
 
@@ -98,18 +112,22 @@ class ZombieGraphBuilder(GraphBuilder):
     def __init__(self, size):
         super().__init__(size)
 
-    def build(self, attribute_seed, edge_seed):
+    def build(self, env, attribute_seed=0, edge_seed=0):
         G = nx.Graph()
 
-        agnt = AgentGenerator(ZombieAgent)
+        agnt = AgentGenerator(ZombieAgent).build()
 
         attr = AttributeGenerator(attribute_seed)
         attr.set_stochastic('zombified', {'distribution': 'binomial', 'arguments': [2, 3]})
         attr.set_deterministic('human', True)
         attr.set_stochastic('weak', {'distribution': 'exponential', 'arguments': [0.01, 0.32]})
+        attr = attr.build()
 
         while G.number_of_nodes() < self.size:
-            G.add_node(agnt.get_next(), attr.get_next())
+            node = next(agnt)
+            meta = next(attr)
+            G.add_node(node, meta)
+            env.process(node.run(env))
 
         for nodeA in G.nodes():
             for nodeB in G.nodes():
@@ -119,32 +137,28 @@ class ZombieGraphBuilder(GraphBuilder):
 
     def build(self, attribute_seed, edge_seed):
         agent = self.get_agent_generator()
-        attr = self.get_attribute_generator()
+        attr = self.get_attribute_generator(attribute_seed)
         graph = self.initialise_graph()
-        graph = self.populate_nodes()
-        graph = self.populate_edges()
+        graph = self.populate_nodes(agent, attr)
+        graph = self.populate_edges(graph, edge_seed)
 or
     def build(self, ...):
         agent = self.get_agent_generator()
         attr = self.get_attribute_generator()
         graph = self.initialise_graph()
         graph = self.populate_graph()
+or
+    def build(...):
+        gen_agent = self.get_agent_generator()
+        gen_attr = self.get_attribute_generator()
+        graph = self.initialise_graph()
+        graph = self.populate_graph(graph, gen_agent, gen_attr)
 
+    def populate_graph(graph, gen_agent, gen_attr):
+        while graph.number_of_nodes() < self.size:
+            node = next(gen_agent)
+            graph.add_node(node, next(gen_attr))
+            self.register_agent(node)
 
-class ZombieNetworkSimGrid(NetSimGridBuilder):
-    def __init__(self):
-        super().__init__()
-
-    def build(self):
-        grid = NetSimGrid()
-        grid.add_dimension('attribute_seed', range(0,1000))
-        grid.add_dimension('edge_seed', range(0,1000))
-        grid.add_dimension('dynamics_seed', range(0,200))
-        return grid
-
-
-class Simulator
-    def run(self, graph_builder, grid_builder):
-        grid = grid_builder.build()
-        self.validate_grid(grid)
-        self.validate_graph(graph)
+    def register_agent(node):
+        self.env.process(node.run(self.env))
