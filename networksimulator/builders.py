@@ -11,7 +11,7 @@ class BaseGraphBuilder(object):
 
     def set(self, **kwargs):
         for key in kwargs:
-            setattr(key, kwargs[key])
+            setattr(self, key, kwargs[key])
             self._attr_teardown[key] = None
 
     def build(self, **kwargs):

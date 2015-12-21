@@ -5,14 +5,16 @@ class NetSimCase(object):
         self.verbose = verbose
         self.runtime = runtime
         self.path = path_results
+        self.success = False
 
     def run(self):
         for point in self.grid:
             graph = self._prepare_graph(**point)
             env = self._prepare_env(graph, **point)
             logger = self._prepare_logger(env, **point)
-            env.run(until=self.runtime)
-            results = logger.stop().get_results()
+            if env.now < self.runtime:
+                env.run(until=self.runtime)
+            results = logger.stop(env).get_results()
             if self.verbose:
                 results.pprint()
             else:
@@ -30,3 +32,8 @@ class NetSimCase(object):
 
     def _prepare_logger(self, env, **kwargs):
         pass
+
+
+def run_simulation(simcase):
+    """"""
+    return simcase.run()
