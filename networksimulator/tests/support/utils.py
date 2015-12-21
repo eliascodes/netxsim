@@ -1,8 +1,6 @@
-def compare_grids(gridA, gridB):
-    for key in gridA.grid:
-        compare_dimension(gridB, key, gridA.grid[key])
-
-
-def compare_array(grid, dimension, lst):
-    for ii in lst:
-        assert(grid.grid[dimension][ii] == lst[ii])
+def count_num_samples(samples, mean, sigma_level):
+    count = 0
+    for sample in samples:
+        if sample < mean+sigma_level and sample > mean-sigma_level:
+            count += 1
+    return count
