@@ -17,20 +17,18 @@ class Grid(object):
             out = {names[ii]: point[ii] for ii in range(0, len(names))}
             yield out
 
-    def add_dimension(self, name, points, description=None):
-        self.grid[name] = points
-        self.meta[name] = description
+    def add_dimensions(self, **kwargs):
+        self.grid.update(kwargs)
         return self
 
-    def add_description(self, name, description):
-        self.meta[name] = description
+    def add_description(self, **kwargs):
+        self.meta.update(kwargs)
         return self
 
     def _subgrid(self, filt, kwargs):
         grid_new = type(self)()
-        for name in kwargs:
-            grid_new.add_dimension(name, filt(self.grid[name], kwargs[name]))
-        return grid_new
+        dims = {k: filt(self.grid[name], v) for k, v in kwargs}
+        return grid_new.add_dimensions(**dims)
 
     def subgrid_from_range(self, **kwargs):
         return self._subgrid(
