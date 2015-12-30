@@ -1,9 +1,10 @@
 """Simulation case and utility functions
 
 """
+import datetime
 
 
-class NetSimCase(object):
+class BaseSimCase(object):
     """Base class for simulation case specification
 
     In order to define a simulation case, this class must be sub-classed, and the _prepare_* methods
@@ -14,6 +15,8 @@ class NetSimCase(object):
     """
 
     timestamp_start = ''
+    timestamp_case = []
+    timestamp_end = ''
 
     def __init__(self, runtime=0):
         self.runtime = runtime
@@ -34,17 +37,13 @@ class NetSimCase(object):
             env = self._prepare_env(graph, **point)
             logger = self._prepare_logger(env, **point)
 
-            if env.now < self.runtime:
-                try:
-                    env.run(until=self.runtime)
-                    success = True
-                except Exception as e:
-                    success = False
+            env.run(until=self.runtime)
+            logger.save()
 
-            if success:
-                return (logger, graph)
-            else:
-                return success
+            self.timestamp_case.append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
+
+        self.timestamp_end = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+        return (logger, graph)
 
     def _prepare_grid(self):
         """Creates and returns the parameter grid determining the parameters of each sim case.
