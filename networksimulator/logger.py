@@ -1,20 +1,14 @@
-from ABC import abstractmethod
-from enum import Enum
+"""Logging module
+
+Very simple logging just to get going: store full graph state in memory every timestep and pickle
+and dump at the end.
+
+
+"""
+
 import os
 import pickle
-from networksimulator.results import NetSimResults
-
-
-class SaveFormat(Enum):
-    NONE = 0
-    PICKLE = 1
-    JSON = 2
-    CSV = 3
-
-
-class DataFormat(Enum):
-    RAW = 1
-    CUSTOM = 2
+import datetime
 
 
 class BaseLogger(object):
@@ -38,17 +32,9 @@ class BaseLogger(object):
 
     _state_hist = []
 
-    interval_log = 1
-    interval_dump = None
-
-    format_save = SaveFormat.NONE
-    format_data = DataFormat.RAW
-
-    path_save = ''
-    name_save = ''
-
-    def __init__(self):
-        self.io = FileWriter()
+    def __init__(self, interval_log, path_save=''):
+        self.interval_log = interval_log
+        self.path_save = path_save
 
     def register(self, graph, env):
         """Creates process instance of log method to run along with the simulation
@@ -79,11 +65,12 @@ class BaseLogger(object):
             self.store_state(self.get_state(graph))
             yield env.timeout(self.interval_log)
 
-    def save(self, in_parts=False):
+    def flush(self):
+        self._state_hist = []
+
+    def save(self):
         """
         """
-        if format_save == SaveFormat.NONE:
-            return self._state_hist
 
         if not self.path_save:
             self.path_save = os.getcwd()
@@ -91,17 +78,16 @@ class BaseLogger(object):
         try:
             os.makedirs(self.path_save, exist_ok=True)
         except Exception as e:
-            print 'Could not save file to specified directory, returning results instead'
+            print('Could not save file to specified directory, returning results instead')
             return self._state_hist
 
-        name_base = self.name_save if self.name_save else 'results_'
-        name_base += datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-        suffix = ''
+        name = 'results_' + datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+        path = os.path.join(self.path_save, name)
+        with open(path, 'wb') as f:
+            pickle.dump(self._state_hist, path)
+
+    def get_state(self, graph):
+        return graph
 
     def store_state(self, state):
-        """
-        """
         self._state_hist.append(state)
-        if self.interval_dump and len(self._state_hist) > self.interval_dump:
-            self.save()
-            self._state_hist = []
