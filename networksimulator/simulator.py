@@ -26,9 +26,6 @@ class BaseSimCase(object):
         """Exectue the simulation
 
         Runs the simulation for each point in the grid and logs the outputs
-
-        Arguments:
-            None
         """
         self.timestamp_start = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
 
@@ -36,8 +33,11 @@ class BaseSimCase(object):
             graph = self._prepare_graph(**point)
             env = self._prepare_env(graph, **point)
             logger = self._prepare_logger(env, **point)
-
-            env.run(until=self.runtime)
+            logger.register(graph, env)
+            try:
+                env.run(until=self.runtime)
+            except Exception as e:
+                print(e)
             logger.save()
 
             self.timestamp_case.append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
