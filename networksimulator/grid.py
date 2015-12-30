@@ -55,4 +55,4 @@ class Grid(object):
         )
 
     def number_of_dimensions(self):
-        return len(self.grid.keys())
+        return len(list(self.grid.keys()))
