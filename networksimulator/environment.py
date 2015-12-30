@@ -25,7 +25,7 @@ class NetworkEnvironment(simpy.Environment):
             time_start (Optional[int]): Time at which to start simulation
         """
         super().__init__(initial_time=time_start)
-        if seed:
+        if seed is not None:
             self.rng = RandomState(seed)
         for node in graph:
             self.process(node.run(graph, self))
