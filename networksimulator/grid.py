@@ -58,3 +58,15 @@ class BaseGrid(object):
 
     def number_of_dimensions(self):
         return len(list(self.grid.keys()))
+
+
+def hash_grid_point(point):
+    """
+
+    Args:
+        point:
+
+    Returns:
+
+    """
+    return hashlib.sha1(pickle.dumps(point)).hexdigest()
