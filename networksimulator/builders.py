@@ -2,7 +2,9 @@ from networkx import Graph
 
 
 class BaseGraphBuilder(object):
-    """"""
+    """
+
+    """
 
     _attr_teardown = {}
 

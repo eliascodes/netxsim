@@ -1,7 +1,9 @@
 import itertools as itt
+import hashlib
+import pickle
 
 
-class Grid(object):
+class BaseGrid(object):
     """"""
     def __init__(self):
         self.grid = {}

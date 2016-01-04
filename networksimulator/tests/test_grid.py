@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-from networksimulator.grid import Grid
+"""
+
+"""
+from networksimulator.grid import BaseGrid
 import itertools as itt
 
 
 def test_create_grid():
-    g = Grid()
+    g = BaseGrid()
 
-    assert(isinstance(g, Grid))
+    assert(isinstance(g, BaseGrid))
 
     x = range(0, 10)
     g.add_dimensions(x=x)
@@ -26,7 +29,7 @@ def test_create_grid():
 
 
 def test_create_subgrid_from_grid():
-    g = Grid()
+    g = BaseGrid()
     g.add_dimensions(x=range(0, 20))
     g.add_dimensions(y=range(0, 20))
 
@@ -34,9 +37,9 @@ def test_create_subgrid_from_grid():
     k = g.subgrid_from_range(x=[0, 10], y=[15, 19])
     l = g.subgrid_from_values(x=[5, 6, 9], y=[0, 14, 19])
 
-    h_exp = Grid().add_dimensions(x=[1, 2, 4, 8, 16]).add_dimensions(y=[12, 15, 19])
-    k_exp = Grid().add_dimensions(x=range(0, 10)).add_dimensions(y=range(15, 19))
-    l_exp = Grid().add_dimensions(x=[5, 6, 9]).add_dimensions(y=[0, 14, 19])
+    h_exp = BaseGrid().add_dimensions(x=[1, 2, 4, 8, 16]).add_dimensions(y=[12, 15, 19])
+    k_exp = BaseGrid().add_dimensions(x=range(0, 10)).add_dimensions(y=range(15, 19))
+    l_exp = BaseGrid().add_dimensions(x=[5, 6, 9]).add_dimensions(y=[0, 14, 19])
 
     assert(h == h_exp)
     assert(k == k_exp)
@@ -44,7 +47,7 @@ def test_create_subgrid_from_grid():
 
 
 def test_iteration():
-    g = Grid().add_dimensions(x=range(0, 3)).add_dimensions(y=range(0, 4))
+    g = BaseGrid().add_dimensions(x=range(0, 3)).add_dimensions(y=range(0, 4))
     points_full = list(itt.product([0, 1, 2], [0, 1, 2, 3]))
     for point in g:
         assert(point['x'] in range(0, 3))

@@ -1,16 +1,22 @@
+#!/usr/bin/env python3
+"""
+
+"""
 from networksimulator import generators
-from networksimulator.tests.support import toyclasses, utils
 import numpy as np
 from scipy.stats import kstest
-from matplotlib import pyplot as plt
+
+
+class Agent(generators.AgentGenerator):
+    pass
 
 
 def test_can_generate_agents():
-    g = generators.AgentGenerator(toyclasses.ToyDeterministicAgent)
+    g = generators.AgentGenerator(Agent)
     g = iter(g)
 
     for ii in range(0, 30):
-        assert(next(g) == toyclasses.ToyDeterministicAgent(ii))
+        assert(next(g) == Agent(ii))
 
 
 def test_can_generate_normally_distributed_attributes():

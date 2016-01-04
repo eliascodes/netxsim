@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
-from networksimulator.tests.support import toyclasses
+"""
+
+"""
 import networkx as nx
+from .. import agents
+
+
+class Agent(agents.BaseAgent):
+    def run(self, graph, env):
+        while True:
+            yield env.timeout(1)
 
 
 def test_hashability():
-    one = toyclasses.ToyDeterministicAgent(1)
-    two = toyclasses.ToyDeterministicAgent(2)
-    uno = toyclasses.ToyDeterministicAgent(1)
+    one = Agent(1)
+    two = Agent(2)
+    uno = Agent(1)
 
     assert(one == uno)
     assert(one != two)
@@ -16,7 +25,7 @@ def test_hashability():
 def test_can_populate_graph():
     G = nx.Graph()
 
-    agent1 = toyclasses.ToyDeterministicAgent(1)
+    agent1 = Agent(1)
     G.add_node(agent1)
 
     assert(G.number_of_nodes() == 1)
@@ -28,7 +37,7 @@ def test_can_populate_graph():
     G.node[agent1]['attribute1'] = True
     assert(G.node[agent1] == {'attribute1': True})
 
-    agent2 = toyclasses.ToyDeterministicAgent(2)
+    agent2 = Agent(2)
     G.add_node(agent2, {'attribute2': True})
 
     G.add_edge(agent1, agent2)
@@ -39,7 +48,7 @@ def test_can_populate_graph():
     for node in G.nodes():
         assert(node == agent1 or node == agent2)
 
-    agent3 = toyclasses.ToyDeterministicAgent(3)
+    agent3 = Agent(3)
     agent3.testAttr = 2
     assert(getattr(agent3, 'testAttr') == 2)
 
