@@ -2,6 +2,9 @@
 
 """
 import datetime
+import collections
+import networkx
+import simpy
 
 
 class BaseSimCase(object):
@@ -33,7 +36,7 @@ class BaseSimCase(object):
             graph = self._prepare_graph(**point)
             env = self._prepare_env(graph, **point)
             logger = self._prepare_logger(env, **point)
-            logger.register(graph, env)
+
             try:
                 env.run(until=self.runtime)
             except Exception as e:
@@ -47,11 +50,8 @@ class BaseSimCase(object):
 
     def _prepare_grid(self):
         """Creates and returns the parameter grid determining the parameters of each sim case.
-
-        Arguments:
-            None
         """
-        pass
+        return collections.Iterable()
 
     def _prepare_graph(self, **kwargs):
         """Creates and returns the NetworkX graph object on which each sim case is run.
@@ -59,7 +59,7 @@ class BaseSimCase(object):
         Arguments:
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
-        pass
+        return networkx.Graph()
 
     def _prepare_env(self, graph, **kwargs):
         """Creates and returns the SimPy Environment object defining the simulation context.
@@ -67,7 +67,7 @@ class BaseSimCase(object):
         Arguments:
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
-        pass
+        return simpy.Environment()
 
     def _prepare_logger(self, env, **kwargs):
         """Creates and returns the NetworkX graph object on which each sim case is run
