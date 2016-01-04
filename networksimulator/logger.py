@@ -17,7 +17,7 @@ class BaseLogger(io.BufferedWriter):
     """Base class for logging simulation signals
     """
 
-    def __init__(self, filepath, interval_log, buffer_size=io.DEFAULT_BUFFER_SIZE):
+    def __init__(self, filepath=os.getcwd(), interval_log=1, buffer_size=io.DEFAULT_BUFFER_SIZE):
         """Constructor
 
         Args:
@@ -53,7 +53,7 @@ class BaseLogger(io.BufferedWriter):
             yield env.timeout(self.interval_log)
 
     def save(self, data=None):
-        """Alias for flush
+        """Writes data to stream or flushes buffer if no inputs are given
 
         Args:
             data: (bytes) : data to be written to stream
