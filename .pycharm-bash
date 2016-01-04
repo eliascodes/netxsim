@@ -1,0 +1,2 @@
+source ~/.bash_profile
+source ~/.virtualenvs/networksimulator/bin/activate
