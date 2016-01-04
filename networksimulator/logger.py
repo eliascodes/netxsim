@@ -7,82 +7,61 @@ and dump at the end.
 """
 
 import os
-import sys
-import math
+import io
+import re
 import pickle
 import datetime
 
 
-class BaseLogger(object):
+class BaseLogger(io.BufferedWriter):
     """Base class for logging simulation signals
-
-    Attributes:
-        name: (string) : Name of simulation case to append to results filename.
-        interval_log: (int) : Simulation time interval at which to record system state. Used to set the timeout event.
-        path_save: (string) : System directory in which to save logged results. If path_save is the empty string and
-                               format_save is not SaveFormat.NONE, the results will be saved to the current working
-                               directory (pwd).
-        _state_hist: (list) : List of stored states in simulation-chronological order.
     """
 
-    _state_hist = []
+    def __init__(self, filepath, interval_log, buffer_size=io.DEFAULT_BUFFER_SIZE):
+        """Constructor
 
-    def __init__(self, name, interval_log, path_save=''):
-        self.name = name
+        Args:
+            filepath: (string) absolute path of results file
+            interval_log: (int) interval at which to log model state
+            buffer_size: (int) number of bytes to keep in memory before writing to file
+        """
+        raw = io.FileIO(os.path.normcase(filepath), 'ab')
+        super().__init__(raw, buffer_size=buffer_size)
         self.interval_log = interval_log
-        self.path_save = path_save
 
     def register(self, graph, env):
         """Creates process instance of log method to run along with the simulation
 
-        Arguments:
+        Args:
             graph : (NetworkX.Graph) : Graph object - subject of simulation
             env : (SimPy.Environment) : Simulation environment
-
-        Returns:
-            None
         """
         env.process(self.log(graph, env))
 
     def log(self, graph, env):
         """Process for logging signals for each logging interval
 
-        Arguments:
+        Args:
             graph : (NetworkX.Graph) : Graph object - subject of simulation
             env : (SimPy.Environment) : Simulation environment
 
         Yields:
             SimPy.Event object, a timeout after one logging interval
-
-        Returns:
-            None
         """
         while True:
-            self.store_state(self.get_state(graph))
+            self.save(self.get_state(graph))
             yield env.timeout(self.interval_log)
 
-    def flush(self):
-        """Empty the state history stored in the logger
+    def save(self, data=None):
+        """Alias for flush
+
+        Args:
+            data: (bytes) : data to be written to stream
         """
-        self._state_hist = []
-
-    def save(self):
-        """Saves the state history as a pickled file with a timestamp
-        """
-
-        if not self.path_save:
-            self.path_save = os.getcwd()
-
-        try:
-            os.makedirs(self.path_save, exist_ok=True)
-        except Exception as e:
-            print('Could not save file to specified directory, returning results instead')
-            return self._state_hist
-
-        name = 'results_' + datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-        path = os.path.join(self.path_save, name)
-        with open(path, 'wb') as f:
-            pickle.dump(self._state_hist, f)
+        if data is not None:
+            self.write(bytes(data))
+        else:
+            self.flush()
 
     def get_state(self, graph):
         """Transforms the graph object at a given simulator time-step into the data-structure describing the state of the
@@ -96,66 +75,48 @@ class BaseLogger(object):
             Object describing the instantaneous state of the simulator
 
         """
-        return graph
-
-    def store_state(self, state):
-        """Stores the state of the simulator for retrieval at a later point. Default behaviour of BaseLogger is simply
-        to hold a list of states in internal memory. See StateLimitedLogger and MemoryLimitedLogger for loggers
-        providing more control over how the states are stored, or overwrite this method.
-
-        Args:
-            state: (mixed) : Object describing the instantaneous state of the simulator
-
-        Returns:
-
-        """
-        self._state_hist.append(state)
+        return pickle.dumps(graph)
 
 
-class StateLimitedLogger(BaseLogger):
-    """Limits the number of states that can be stored in memory before writing them to file
+class LoggerFactory(object):
     """
-    def __init__(self, name, interval_log, limit_num_states=100):
-        """
-        Keyword Args:
-            limit_num_states: (int) | Default=100 | Limit for number of simulator states to keep in memory before saving
-        """
-        super().__init__(name, interval_log)
-        self.limit_num_states = limit_num_states
 
-    def store_state(self, state):
-        """If the number of states stored in memory is greater than or equal to the limit attribute, the states are
-        saved to disk and flushed from memory.
-
-        Args:
-            state: (mixed) | Object describing the instantaneous state of the simulator, to be stored
-        """
-        if len(self._state_hist) >= self.limit_num_states:
-            self.save()
-            self.flush()
-        self._state_hist.append(state)
-
-
-class MemoryLimitedLogger(StateLimitedLogger):
-    """Limits the memory that stored states can use before writing them to file
     """
-    def __init__(self, name, interval_log, limit_bytes_states=1024):
-        """
-        Keyword Args:
-            limit_bytes_states: (int) | Default=1024 | Maximum memory limit on simulator states before saving
-        """
-        super().__init__(name, interval_log, limit_num_states=0)
-        self.limit_bytes_states = limit_bytes_states
-        self.est_bytes_state = None
 
-    def store_state(self, state):
-        """When storing the first state, calculate the size of the pickled string and use it to estimate the number of
-        states that can be stored before exceeding the memory limit
+    def __init__(self, logger_class, dir_results):
+        self.dir_results = dir_results
+        self.prefix = 'log'
+        self.name = 'simulation'
+        self.id = ''
+        self.timestamp = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+        self.fext = 'pickle'
+        self.logger_class = logger_class
+        self.interval_log = 1
+        self.buffer_size = io.DEFAULT_BUFFER_SIZE
+        self.replace_previous = False
 
-        Args:
-            state: (mixed) | Object describing the instantaneous state of the simulator, to be stored
-        """
-        if len(self._state_hist) > 0 and self.est_bytes_state is None:
-            self.est_bytes_state = sys.getsizeof(pickle.dumps(self._state_hist[0]))
-            self.limit_num_states = math.floor(self.limit_bytes_states / self.est_bytes_state)
-        super().store_state(state)
+    def build_file_prefix(self):
+        pre = [self.prefix, self.name, self.id]
+        return '_'.join(filter(lambda x: x, pre))
+
+    def build_file_path(self):
+        pre = [self.prefix, self.name, self.id, self.timestamp]
+        pre = '_'.join(filter(lambda x: x, pre))
+        if self.fext:
+            pre += '.' + self.fext
+        return os.path.join(self.dir_results, pre)
+
+    def build(self):
+        os.makedirs(os.path.normcase(self.dir_results), exist_ok=True)
+
+        contents = os.listdir(os.path.normcase(self.dir_results))
+        contents = [f for f in contents if os.path.isfile(os.path.join(self.dir_results, f))]
+
+        fprefix = self.build_file_prefix()
+
+        if len(contents) > 0 and self.replace_previous:
+            for file in contents:
+                if re.match(fprefix, file):
+                    os.remove(file)
+
+        return self.logger_class(self.build_file_path(), self.interval_log, buffer_size=self.buffer_size)
