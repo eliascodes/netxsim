@@ -5,6 +5,7 @@ import datetime
 import collections
 import networkx
 import simpy
+from . import logger, grid
 
 
 class BaseSimCase(object):
@@ -17,44 +18,48 @@ class BaseSimCase(object):
         runtime : (int) [optional] : The runtime of the simulation
     """
 
-    timestamp_start = ''
-    timestamp_case = []
-    timestamp_end = ''
-
     def __init__(self, runtime=0):
+        self.grid = None
         self.runtime = runtime
         self.success = False
+        self.timestamp = {
+            'start': None,
+            'end': None
+        }
 
     def run(self):
-        """Exectue the simulation
+        """Execute the simulation
 
         Runs the simulation for each point in the grid and logs the outputs
         """
-        self.timestamp_start = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+        self.timestamp['start'] = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
 
         for point in self._prepare_grid():
             graph = self._prepare_graph(**point)
             env = self._prepare_env(graph, **point)
-            logger = self._prepare_logger(env, **point)
+            log = self._prepare_logger(graph, env, **point)
 
             try:
                 env.run(until=self.runtime)
             except Exception as e:
                 print(e)
-            logger.save()
+            log.save()
 
-            self.timestamp_case.append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
+            #self.timestamp[grid.hash_grid_point(point)].append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
 
-        self.timestamp_end = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-        return (logger, graph)
+        self.timestamp['end'] = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
 
     def _prepare_grid(self):
         """Creates and returns the parameter grid determining the parameters of each sim case.
+
+        This method should be deterministic
         """
         return collections.Iterable()
 
     def _prepare_graph(self, **kwargs):
         """Creates and returns the NetworkX graph object on which each sim case is run.
+
+        This method should be deterministic
 
         Arguments:
             kwargs : (dict) : key-value pairs determining the grid point parameters
@@ -64,25 +69,20 @@ class BaseSimCase(object):
     def _prepare_env(self, graph, **kwargs):
         """Creates and returns the SimPy Environment object defining the simulation context.
 
+        This method should be deterministic
+
         Arguments:
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
         return simpy.Environment()
 
-    def _prepare_logger(self, env, **kwargs):
+    def _prepare_logger(self, graph, env, **kwargs):
         """Creates and returns the NetworkX graph object on which each sim case is run
 
+        This method should be deterministic
+
         Arguments:
-            env : (SimPy.Environment) : Environment object
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
-        pass
+        return logger.BaseLogger()
 
-
-def run_simulation(simcase):
-    """Run simulation
-
-    Arguments:
-        simcase : (NetSimCase) : Simcase object
-    """
-    return simcase.run()
