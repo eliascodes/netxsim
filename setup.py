@@ -8,5 +8,5 @@ setup(
     description='Network/Graph simulation package',
     author='Elias Malik',
     packages=['networksimulator'],
-    install_requires=['networkx']
+    install_requires=['networkx', 'simpy', 'numpy']
 )
