@@ -2,7 +2,9 @@
 
 """
 import os
+import glob
 import pickle
+from . import grid as nsg
 
 
 class BaseResults(object):
@@ -29,19 +31,38 @@ class BaseResults(object):
         pass
 
     @classmethod
-    def from_file(cls, path):
+    def from_file(cls, file):
         data = []
         try:
-            with open(os.path.normcase(path), 'rb') as file:
+            with file as f:
                 while True:
-                    data.append(pickle.load(file))
+                    data.append(pickle.load(f))
         except EOFError:
-            pass
+            pass  # Reach end of saved data
         except FileNotFoundError as e:
             print(e)
 
         return cls(data)
 
+    @classmethod
+    def from_path(cls, path):
+        file = open(os.path.normcase(path), 'rb')
+        return cls.from_file(file)
 
-def from_file(path):
-    return BaseResults.from_file(path)
+
+def from_path(path):
+    return BaseResults.from_path(path)
+
+
+def from_dir(path):
+    pass
+
+
+def from_grid(grid, root):
+    results = []
+    for point in grid:
+        pattern = '*' + nsg.hash_grid_point(point) + '*'
+        path = glob.glob(os.path.join(root, pattern))[0]
+        results.append(BaseResults.from_path(path))
+
+    return results
