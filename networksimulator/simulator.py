@@ -2,10 +2,6 @@
 
 """
 import datetime
-import collections
-import networkx
-import simpy
-from . import logger, grid
 
 
 class BaseSimCase(object):
@@ -43,7 +39,6 @@ class BaseSimCase(object):
                 env.run(until=self.runtime)
             except Exception as e:
                 print(e)
-            log.save()
             log.close()
 
             #self.timestamp[grid.hash_grid_point(point)].append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
@@ -55,7 +50,7 @@ class BaseSimCase(object):
 
         This method should be deterministic
         """
-        return collections.Iterable()
+        raise NotImplementedError
 
     def _prepare_graph(self, **kwargs):
         """Creates and returns the NetworkX graph object on which each sim case is run.
@@ -65,7 +60,7 @@ class BaseSimCase(object):
         Arguments:
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
-        return networkx.Graph()
+        raise NotImplementedError
 
     def _prepare_env(self, graph, **kwargs):
         """Creates and returns the SimPy Environment object defining the simulation context.
@@ -75,7 +70,7 @@ class BaseSimCase(object):
         Arguments:
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
-        return simpy.Environment()
+        raise NotImplementedError
 
     def _prepare_logger(self, graph, env, **kwargs):
         """Creates and returns the NetworkX graph object on which each sim case is run
@@ -85,5 +80,5 @@ class BaseSimCase(object):
         Arguments:
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
-        return logger.BaseLogger()
+        raise NotImplementedError
 
