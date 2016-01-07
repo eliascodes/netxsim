@@ -36,7 +36,7 @@ class BaseResults(object):
         try:
             with file as f:
                 while True:
-                    data.append(pickle.load(f))
+                    data += pickle.load(f)
         except EOFError:
             pass  # Reach end of saved data
         except FileNotFoundError as e:
