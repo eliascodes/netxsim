@@ -67,4 +67,5 @@ class AttributeGenerator(object):
                 distn = self.attr_stochastic[key]['distribution']
                 args = self.attr_stochastic[key]['arguments']
                 attr_dic[key] = getattr(self.rng, distn)(*args)
+            attr_dic = copy.deepcopy(self.__constant__)
             yield attr_dic
