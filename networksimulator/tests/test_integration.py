@@ -4,6 +4,8 @@
 """
 import networkx as nx
 from .. import agents, builders, environment, generators, grid, logger, results, simulator
+from matplotlib import pyplot as plt
+import pickle
 
 
 class Builder(builders.BaseGraphBuilder):
@@ -25,9 +27,14 @@ class Builder(builders.BaseGraphBuilder):
 class Agent(agents.BaseAgent):
     def run(self, graph, env):
         while True:
-            if env.draw('normal') > 0.5:
+            if env.draw('normal') > 0:
                 graph.node[self]['state'] = not graph.node[self]['state']
             yield env.timeout(1)
+
+
+class Logger(logger.BaseLogger):
+    def get_state(self, graph):
+        return pickle.dumps(sum([1*attr['state'] for (_, attr) in graph.nodes(data=True)]))
 
 
 class Case(simulator.BaseSimCase):
@@ -45,11 +52,12 @@ class Case(simulator.BaseSimCase):
         return Builder().build(**kwargs)
 
     def _prepare_logger(self, graph, env, **kwargs):
-        factory = logger.LoggerFactory(logger.BaseLogger, '/Users/elias/projects/networksimulator/_results/')
+        factory = logger.LoggerFactory(Logger, '/Users/elias/projects/networksimulator/_results/')
         factory.name = 'sandbox'
         factory.prefix = 'results'
         factory.id = grid.hash_grid_point(kwargs)
         factory.buffer_size = 1024 * 1024 * 100  # 100 MB
+        factory.replace_previous = True
         log = factory.build()
         log.register(graph, env)
         return log
@@ -58,4 +66,6 @@ class Case(simulator.BaseSimCase):
 def test_full_simulation_flow():
     s = Case(5)
     s.run()
-    r = results.from_grid(s.grid.subgrid_from_values(seed=4))
+    r = results.from_grid(s.grid.subgrid_from_values(seed=[4]), '/Users/elias/projects/networksimulator/_results/')
+    plt.plot(r[0].data)
+    plt.show(block=True)
