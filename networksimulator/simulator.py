@@ -44,6 +44,7 @@ class BaseSimCase(object):
             except Exception as e:
                 print(e)
             log.save()
+            log.close()
 
             #self.timestamp[grid.hash_grid_point(point)].append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
 
