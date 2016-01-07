@@ -7,27 +7,32 @@ and dump at the end.
 """
 
 import os
-import io
 import re
+import sys
 import pickle
 import datetime
 
 
-class BaseLogger(io.BufferedWriter):
+DEFAULT_BUFFER_SIZE = 1024 * 1024 * 200  # 200 MB default buffer
+
+
+class BaseLogger(object):
     """Base class for logging simulation signals
     """
 
-    def __init__(self, filepath=os.getcwd(), interval_log=1, buffer_size=io.DEFAULT_BUFFER_SIZE):
+    def __init__(self, path_results, interval_log=1, buffer_size=DEFAULT_BUFFER_SIZE):
         """Constructor
 
         Args:
-            filepath: (string) absolute path of results file
+            path_results: (string) absolute path of results file
             interval_log: (int) interval at which to log model state
             buffer_size: (int) number of bytes to keep in memory before writing to file
         """
-        raw = io.FileIO(os.path.normcase(filepath), 'ab')
-        super().__init__(raw, buffer_size=buffer_size)
+        self.__file__ = open(os.path.normcase(path_results), 'ab')
+        self.__state__ = []
         self.interval_log = interval_log
+        self.size_buffer = buffer_size
+        self.limit_num_state = 0
 
     def register(self, graph, env):
         """Creates process instance of log method to run along with the simulation
@@ -52,16 +57,20 @@ class BaseLogger(io.BufferedWriter):
             self.save(self.get_state(graph))
             yield env.timeout(self.interval_log)
 
-    def save(self, data=None):
+    def save(self, data):
         """Writes data to stream or flushes buffer if no inputs are given
 
         Args:
             data: (bytes) : data to be written to stream
         """
-        if data is not None:
-            self.write(data)
+        if not self.limit_num_state:
+            self.limit_num_state = int(self.size_buffer / sys.getsizeof(data))
+
+        if self.__state__ and len(self.__state__) >= self.limit_num_state:
+            pickle.dump(self.__file__, self.__state__)
+            self.__state__ = [data]
         else:
-            self.flush()
+            self.__state__.append(data)
 
     def get_state(self, graph):
         """Transforms the graph object at a given simulator time-step into the data-structure describing the state of the
@@ -75,7 +84,14 @@ class BaseLogger(io.BufferedWriter):
             Object describing the instantaneous state of the simulator
 
         """
-        return pickle.dumps(graph)
+        return graph
+
+    def close(self):
+        """Writes the any remaining data-points held in the logger state to file and closes the file
+        """
+        pickle.dump(self.__state__, self.__file__)
+        self.__state__ = []
+        self.__file__.close()
 
 
 class LoggerFactory(object):
@@ -92,7 +108,7 @@ class LoggerFactory(object):
         self.fext = 'pickle'
         self.logger_class = logger_class
         self.interval_log = 1
-        self.buffer_size = io.DEFAULT_BUFFER_SIZE
+        self.buffer_size = DEFAULT_BUFFER_SIZE
         self.replace_previous = False
 
     def build_file_prefix(self):
