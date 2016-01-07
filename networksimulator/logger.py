@@ -59,7 +59,7 @@ class BaseLogger(io.BufferedWriter):
             data: (bytes) : data to be written to stream
         """
         if data is not None:
-            self.write(bytes(data))
+            self.write(data)
         else:
             self.flush()
 
@@ -117,6 +117,6 @@ class LoggerFactory(object):
         if len(contents) > 0 and self.replace_previous:
             for file in contents:
                 if re.match(fprefix, file):
-                    os.remove(file)
+                    os.remove(os.path.join(self.dir_results, file))
 
         return self.logger_class(self.build_file_path(), self.interval_log, buffer_size=self.buffer_size)
