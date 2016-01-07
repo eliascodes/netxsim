@@ -29,7 +29,7 @@ class BaseGrid(object):
 
     def _subgrid(self, filt, kwargs):
         grid_new = type(self)()
-        dims = {k: filt(self.grid[k], v) for k, v in kwargs}
+        dims = {k: filt(self.grid[k], v) for k, v in kwargs.items()}
         return grid_new.add_dimensions(**dims)
 
     def subgrid_from_range(self, **kwargs):
