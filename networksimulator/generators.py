@@ -43,8 +43,7 @@ class AttributeGenerator(object):
             if hasattr(self.rng, distribution):
                 self.attr_stochastic[attr] = {'distribution': distribution, 'arguments': arguments}
             else:
-                raise AttributeError('{0} is not a valid method of {1}'
-                                     .format(params['distribution'], self.rng))
+                raise AttributeError('{0} is not a valid method of {1}'.format(distribution, self.rng))
         else:
             raise TypeError("Inputs must not be NoneType")
         return self
