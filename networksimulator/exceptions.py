@@ -1,0 +1,7 @@
+"""
+
+"""
+
+
+class FrozenException(Exception):
+    pass
