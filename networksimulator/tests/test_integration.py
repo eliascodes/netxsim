@@ -5,14 +5,13 @@
 import networkx as nx
 from .. import agents, builders, environment, generators, grid, logger, results, simulator
 from matplotlib import pyplot as plt
-import pickle
 
 
 class Builder(builders.BaseGraphBuilder):
     def _prepare_build(self, **kwargs):
-        g_agent = generators.AgentGenerator(Agent)
-        g_attr = generators.AttributeGenerator(0)
-        g_attr.set_deterministic('state', True)
+        g_agent = generators.AgentGeneratorBuilder(Agent)
+        g_attr = generators.AttributeGeneratorBuilder(0)
+        g_attr.add_constant(state=True)
         self.set(size=100, gen_agent=iter(g_agent), gen_attr=iter(g_attr))
 
     def _construct(self, **kwargs):
@@ -34,7 +33,7 @@ class Agent(agents.BaseAgent):
 
 class Logger(logger.BaseLogger):
     def get_state(self, graph):
-        return pickle.dumps(sum([1*attr['state'] for (_, attr) in graph.nodes(data=True)]))
+        return sum([1*attr['state'] for (_, attr) in graph.nodes(data=True)])
 
 
 class Case(simulator.BaseSimCase):
@@ -64,7 +63,7 @@ class Case(simulator.BaseSimCase):
 
 
 def test_full_simulation_flow():
-    s = Case(5)
+    s = Case(100)
     s.run()
     r = results.from_grid(s.grid.subgrid_from_values(seed=[4]), '/Users/elias/projects/networksimulator/_results/')
     plt.plot(r[0].data)
