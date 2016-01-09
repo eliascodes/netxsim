@@ -1,6 +1,7 @@
-import numpy.random as np_rand
+from numpy import random
+from scipy import stats
 import copy
-from . import agents
+from . import agents, exceptions
 
 
 class BaseGeneratorBuilder(object):
@@ -14,6 +15,7 @@ class BaseGeneratorBuilder(object):
         raise NotImplementedError
 
     def build(self):
+        self.freeze()
         return iter(self)
 
     @property
@@ -57,7 +59,7 @@ class AttributeGeneratorBuilder(BaseGeneratorBuilder):
             seed: <int> Seed for numpy's RandomState RNG
         """
         super().__init__()
-        self.__rng__ = np_rand.RandomState(seed)
+        self.__rng__ = random.RandomState(seed)
         self.__constant__ = {}
         self.__stochastic__ = {}
 
@@ -68,7 +70,7 @@ class AttributeGeneratorBuilder(BaseGeneratorBuilder):
             kwargs: <dict> Name-value pairs of constant attributes
         """
         if self.frozen:
-            raise BaseException("frozen")
+            raise exceptions.FrozenException
         for (attr, val) in kwargs.items():
             self.__constant__[attr] = val
         return self
@@ -84,19 +86,17 @@ class AttributeGeneratorBuilder(BaseGeneratorBuilder):
         Example: add_stochastic('hasFlu', binomial=[n, p])
         """
         if self.frozen:
-            raise BaseException("frozen")
+            raise exceptions.FrozenException
         for (k, v) in kwargs.items():
-            if not hasattr(self.__rng__, k):
-                raise AttributeError('{0} is not a valid method of {1}'.format(k, self.__rng__))
+            if not hasattr(stats, k):
+                raise AttributeError('{0} is not a valid method of {1}'.format(k, stats.__name__))
             self.__stochastic__[attr] = {'distribution': k, 'arguments': v}
         return self
 
     def __iter__(self):
-        self.freeze()
         while True:
             attr_dic = copy.deepcopy(self.__constant__)
-            for key in self.__stochastic__:
-                dist = self.__stochastic__[key]['distribution']
-                args = self.__stochastic__[key]['arguments']
-                attr_dic[key] = getattr(self.__rng__, dist)(*args)
+            for (attr, info) in self.__stochastic__.items():
+                distribution = getattr(stats, info['distribution'])
+                attr_dic[attr] = distribution.rvs(*info['arguments'], random_state=self.__rng__)
             yield attr_dic
