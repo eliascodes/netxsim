@@ -57,3 +57,13 @@ def test_can_populate_graph():
     assert(G.number_of_nodes(), 3)
     print(G.node[agent3])
     assert(G.node[agent3] == {'testAttr': 2})
+
+
+def test_can_select_node_with_agent_index():
+    G = nx.Graph()
+
+    G.add_node(Agent(1), {'state': True})
+    G.add_node(Agent(2), {'state': False})
+
+    assert G.node[Agent(1)]['state']
+    assert not G.node[Agent(2)]['state']

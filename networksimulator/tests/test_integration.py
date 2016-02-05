@@ -3,24 +3,9 @@
 
 """
 import networkx as nx
-from .. import agents, builders, environment, generators, grid, logger, results, simulator
+from .. import agents, builders, environment, grid, logger, results, simulator
 from matplotlib import pyplot as plt
-
-
-class Builder(builders.BaseGraphBuilder):
-    def _prepare_build(self, **kwargs):
-        g_agent = generators.AgentGeneratorBuilder(Agent)
-        g_attr = generators.AttributeGeneratorBuilder(0)
-        g_attr.add_constant(state=True)
-        self.set(size=100, gen_agent=iter(g_agent), gen_attr=iter(g_attr))
-
-    def _construct(self, **kwargs):
-        graph = nx.Graph()
-        while graph.number_of_nodes() < self.size:
-            node_agent = next(self.gen_agent)
-            node_attr = next(self.gen_attr)
-            graph.add_node(node_agent, node_attr)
-        return graph
+from numpy import random
 
 
 class Agent(agents.BaseAgent):
@@ -48,7 +33,19 @@ class Case(simulator.BaseSimCase):
         return environment.NetworkEnvironment(graph, seed=kwargs['seed'])
 
     def _prepare_graph(self, **kwargs):
-        return Builder().build(**kwargs)
+        rng = random.RandomState(kwargs['seed'])
+        num_nodes = 100
+
+        b = builders.GraphFactory(rng)
+        b.set_size(num_nodes)
+        b.set_agent(Agent)
+        b.set_node_attribute(alive=True, sick=False)
+        b.set_node_attribute(carrier=('normal', [0, 1], {'loc': 0}), immune=('binomial', [40, 0.05]))
+        b.set_node_attribute(vulnerable=(random.beta, [0.1, 0.2]))
+        b.set_edge_by_distribution(('normal', [0, 1], {}), threshold=0)
+        b.set_edge_attribute(contact_frequency={'uniform': [0, 1]})
+
+        return b.build()
 
     def _prepare_logger(self, graph, env, **kwargs):
         factory = logger.LoggerFactory(Logger, '/Users/elias/projects/networksimulator/_results/')
