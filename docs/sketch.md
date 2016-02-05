@@ -162,3 +162,77 @@ or
 
     def register_agent(node):
         self.env.process(node.run(self.env))
+
+Logger object should have option to keep results in memory until simulation completes or to
+periodically dump result to file (either same file or different files). Logger should have a factory
+method to prodcue a results object from logged results (which should work independently of whether
+the results are dumped or kept in memory)
+
+
+Re-think of builder; scipy is too slow to sample one by one in a generator
+
+b = BaseGraphBuilder()
+b.add_layer(AGraphPipeline, priority=1)
+b.add_layer(BGraphPipeline, priority=10)
+
+preferably each pipeline should do only one thing: add agents, add attributes, add edges, etc
+Builder should either loop exhaustively or keep going until stop condition. Actually an iterative build process in no
+different really from dynamics. So this is just a sim-within-a-sim, which should be avoided. But I guess layers idea is
+still useful. And can keep generators around, but make them more generic and simpler.
+
+class BasePipeline(object):
+    def __init__(self):
+        pass
+
+
+class AgentPipeline(BasePipeline):
+    def __init__(self, agent_type, size=1):
+        super().__init__()
+        self.agent_type
+        self.size = size
+
+    def process(self, graph):
+        while graph.number_of_nodes() < self.size:
+            graph.add_node(self.agent_type())
+        return graph
+
+class AttributePipeline(BasePipeline):
+    def __init__(self):
+        super().__init__()
+        self.__constant__ = {}
+        self.__stochastic__ = {}
+
+    def add_attribute(*args, **kwargs):
+        pass
+
+    def process(self, graph):
+        attr_dic = copy.deepcopy(self.__constant__)
+        for (name, params) in self.__stochastic__.items():
+            getattr(params['distribution']
+
+
+
+class SimCase():
+    ...
+
+    def _prepare_graph(self, **kwargs):
+        b = Builder()
+        b.add_build_step(AddAgentNodes(Agent, 1000))
+        b.add_build_step(AddCustomTopology())
+        graph = b.build()
+
+        ...  # some manual steps
+
+        return graph
+
+Is this a more general "build manager" pattern?
+
+b = BuildManager()
+b.add_build_step(CustomBuildStepOne(*args, **kwargs))
+b.add_build_step(CustomBuildStepTwo(*args, **kwargs))
+
+huskOne = nx.Graph()
+huskTwo = nx.MultiDiGraph()
+
+a = b.build(huskOne)
+c = b.build(huskTwo)
