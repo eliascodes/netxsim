@@ -19,4 +19,9 @@ class BaseAgent(object):
         return isinstance(other, type(self)) and hash(self) == hash(other)
 
     def run(self, graph, env):
+        raise NotImplementedError
+
+
+class NodeAgent(BaseAgent):
+    def run(self, graph, env):
         yield env.timeout(1)
