@@ -4,7 +4,7 @@ import os
 import shutil
 
 
-DEFAULT_DIR = os.path.join(os.getcwd(), 'dump')
+DEFAULT_DIR = os.path.join(os.getcwd(), 'data')
 DEFAULT_FILE_PATH = os.path.join(DEFAULT_DIR, 'log_test.pickle')
 
 
@@ -14,9 +14,9 @@ def file(request):
 
     def fin():
         shutil.rmtree(DEFAULT_DIR)
-    request.add_finalizer(fin)
+    request.addfinalizer(fin)
 
-    return open(os.path.join(DEFAULT_FILE_PATH, 'log_test.pickle'), 'ab')
+    return open(DEFAULT_FILE_PATH, 'ab')
 
 
 def test_build_logger():
