@@ -43,7 +43,7 @@ class Case(simulator.BaseSimCase):
         b.set_node_attribute(carrier=('normal', [0, 1], {'loc': 0}), immune=('binomial', [40, 0.05]))
         b.set_node_attribute(vulnerable=(random.beta, [0.1, 0.2]))
         b.set_edge_by_distribution(('normal', [0, 1], {}), threshold=0)
-        b.set_edge_attribute(contact_frequency={'uniform': [0, 1]})
+        b.set_edge_attribute(contact_frequency=('uniform', [0, 1]))
 
         return b.build()
 
