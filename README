@@ -3,15 +3,16 @@
 NETSIM is a network simulator framework written in Python 3 and based on the
 [NetworkX](http://networkx.readthedocs.org/) and [SimPy](http://simpy.readthedocs.org) package.
 
-### Introduction
+## Introduction
 NETSIM is built on top of NetworkX and SimPy. Its architecture is inspired by the
 [nxsim](https://github.com/kentwait/nxsim/) project, which is in turn a Python 3 port and update of
 [ComplexNetworkSim](https://github.com/jschaul/ComplexNetworkSim). Thanks to the authors of both
 packages for their work.
 
-#### Who should use NETSIM?
+### Who should use NETSIM?
 If you want to do simple simulations using NetworkX based graph objects.
 
+## Users
 
 ### Getting Started
 TBD
@@ -22,9 +23,18 @@ TBD
 #### Basic Usage
 TBD
 
+## Developers
+
+### Getting Started
+Please **FORK** and then clone the repository.
 
 ### Contributing
-TBD
+Please submit pull requests from your **FORK** of the repository.
+
+### Testing
+The `./networksimulator/tests` directory contains all of the packages tests. Each module has a corresponding test file.
+
+Tests are written using the py.test module.
 
 ### Roadmap
 TBD
