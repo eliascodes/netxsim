@@ -1,11 +1,15 @@
-#!/usr/bin/env python3
 import pytest
 import math
 import networkx as nx
 from .. import builders, agents
 import numpy as np
 from scipy import stats
-from matplotlib import pyplot as plt
+
+
+class NodeAgent(agents.BaseAgent):
+    """NodeAgent is a mock agent for use in testing the builder"""
+    def run(self, graph, env):
+        yield env.timeout(1)
 
 
 @pytest.fixture
@@ -18,6 +22,18 @@ def node_builder_setup_rng():
     seed = 103208
     rng = np.random.RandomState(seed)
     return builders.NodeListBuilder(rng), nx.Graph()
+
+
+@pytest.fixture
+def edge_builder_setup():
+    return builders.EdgeListBuilder(), nx.Graph()
+
+
+@pytest.fixture
+def edge_builder_setup_rng():
+    SEED = 734865
+    rng = np.random.RandomState(SEED)
+    return builders.EdgeListBuilder(rng), nx.Graph()
 
 
 def test_build_node_list_without_agents_without_attributes(node_builder_setup):
@@ -33,12 +49,12 @@ def test_build_node_list_without_agents_without_attributes(node_builder_setup):
 def test_build_node_list_with_agents_without_attributes(node_builder_setup):
     b, g = node_builder_setup
     b.size = 10
-    b.agent = agents.NodeAgent
+    b.agent = NodeAgent
 
     nlist = b.build(g)
 
     for ii in range(0, b.size):
-        assert nlist[ii] == agents.NodeAgent(ii)
+        assert nlist[ii] == NodeAgent(ii)
 
 
 def test_build_node_list_without_agents_with_constant_attributes(node_builder_setup):
@@ -59,12 +75,12 @@ def test_build_node_list_with_agents_with_constant_attributes(node_builder_setup
     attributes = {'a': 1, 'b': '$', 'c': -1}
     b.add(**attributes)
     b.size = 10
-    b.agent = agents.NodeAgent
+    b.agent = NodeAgent
 
     nlist = b.build(g)
 
     for ii in range(0, b.size):
-        assert nlist[ii][0] == agents.NodeAgent(ii)
+        assert nlist[ii][0] == NodeAgent(ii)
         assert nlist[ii][1] == attributes
 
 
@@ -145,17 +161,6 @@ def test_build_node_list_with_continuously_distributed_random_attributes_with_st
 def test_build_node_list_with_discretely_distributed_random_attributes_with_statistically_correct_properties(node_builder_setup_rng):
     pass
 
-
-@pytest.fixture
-def edge_builder_setup():
-    return builders.EdgeListBuilder(), nx.Graph()
-
-
-@pytest.fixture
-def edge_builder_setup_rng():
-    SEED = 734865
-    rng = np.random.RandomState(SEED)
-    return builders.EdgeListBuilder(rng), nx.Graph()
 
 def test_can_add_constant_attributes_to_edge_list_builder():
     pass

@@ -20,8 +20,3 @@ class BaseAgent(object):
 
     def run(self, graph, env):
         raise NotImplementedError
-
-
-class NodeAgent(BaseAgent):
-    def run(self, graph, env):
-        yield env.timeout(1)
