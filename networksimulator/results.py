@@ -53,6 +53,8 @@ class BaseResults(object):
 def from_path(path):
     return BaseResults.from_path(path)
 
+def from_file(file):
+    return BaseResults.from_file(file)
 
 def from_dir(path):
     pass

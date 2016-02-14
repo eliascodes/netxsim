@@ -12,7 +12,7 @@ def summarise_state(graph):
     return sum([1 for (_, d) in graph.nodes(data=True) if d['state']])
 
 
-def test_can_build_from_file():
-    r = results.from_file(FILEPATH)
+def test_can_build_from_file_path():
+    r = results.from_path(FILEPATH)
     states = map(summarise_state, r.data)
     print(states)
