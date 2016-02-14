@@ -146,6 +146,17 @@ def test_build_node_list_with_discretely_distributed_random_attributes_with_stat
     pass
 
 
+@pytest.fixture
+def edge_builder_setup():
+    return builders.EdgeListBuilder(), nx.Graph()
+
+
+@pytest.fixture
+def edge_builder_setup_rng():
+    SEED = 734865
+    rng = np.random.RandomState(SEED)
+    return builders.EdgeListBuilder(rng), nx.Graph()
+
 def test_can_add_constant_attributes_to_edge_list_builder():
     pass
 
