@@ -36,7 +36,7 @@ class BaseListBuilder(object):
     def _parse_args(self, arg):
         if isinstance(arg, tuple):
             dist = self._parse_distribution(arg[0])
-            arg = (dist, arg[1], arg[2])
+            arg = (dist, arg[1], arg[2]) if len(arg) > 2 else (dist, arg[1], {})
         return arg
 
     def _build_list(self, list_attr, graph):
