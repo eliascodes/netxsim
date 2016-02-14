@@ -15,4 +15,3 @@ def summarise_state(graph):
 def test_can_build_from_file_path():
     r = results.from_path(FILEPATH)
     states = map(summarise_state, r.data)
-    print(states)
