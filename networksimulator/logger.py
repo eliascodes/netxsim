@@ -66,7 +66,7 @@ class BaseLogger(object):
         if not self.limit_num_state:
             self.limit_num_state = int(self.size_buffer / sys.getsizeof(data))
 
-        if self.__state__ and len(self.__state__) >= self.limit_num_state:
+        if len(self.__state__) >= self.limit_num_state:
             pickle.dump(self.__file__, self.__state__)
             self.__state__ = [data]
         else:
