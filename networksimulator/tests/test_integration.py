@@ -2,7 +2,6 @@
 """
 
 """
-import networkx as nx
 from .. import agents, builders, environment, grid, logger, results, simulator
 from matplotlib import pyplot as plt
 from numpy import random
@@ -12,13 +11,13 @@ class Agent(agents.BaseAgent):
     def run(self, graph, env):
         while True:
             if env.draw('normal') > 0:
-                graph.node[self]['state'] = not graph.node[self]['state']
+                graph.node[self]['sick'] = not graph.node[self]['sick']
             yield env.timeout(1)
 
 
 class Logger(logger.BaseLogger):
     def get_state(self, graph):
-        return sum([1*attr['state'] for (_, attr) in graph.nodes(data=True)])
+        return sum([1*attr['sick'] for (_, attr) in graph.nodes(data=True)])
 
 
 class Case(simulator.BaseSimCase):
@@ -50,13 +49,10 @@ class Case(simulator.BaseSimCase):
     def _prepare_logger(self, graph, env, **kwargs):
         factory = logger.LoggerFactory(Logger, '/Users/elias/projects/networksimulator/_results/')
         factory.name = 'sandbox'
-        factory.prefix = 'results'
         factory.id = grid.hash_grid_point(kwargs)
         factory.buffer_size = 1024 * 1024 * 100  # 100 MB
         factory.replace_previous = True
-        log = factory.build()
-        log.register(graph, env)
-        return log
+        return factory.build().register(graph, env)
 
 
 def test_full_simulation_flow():
