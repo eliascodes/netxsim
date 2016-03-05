@@ -9,36 +9,5 @@ NETSIM is built on top of NetworkX and SimPy. Its architecture is inspired by th
 [ComplexNetworkSim](https://github.com/jschaul/ComplexNetworkSim). Thanks to the authors of both
 packages for their work.
 
-### Who should use NETSIM?
-If you want to do simple simulations using NetworkX based graph objects.
-
-## Users
-
-### Getting Started
-TBD
-
-#### Installation
-TBD
-
-#### Basic Usage
-TBD
-
-## Developers
-
-### Getting Started
-Please **FORK** and then clone the repository.
-
-### Contributing
-Please submit pull requests from your **FORK** of the repository.
-
-### Testing
-The `./networksimulator/tests` directory contains all of the packages tests. Each module has a corresponding test file.
-
-Tests are written using the py.test module.
-
-### Roadmap
-TBD
-
-### TODOs
-
-Test graph builders and associated functions
+## Status
+Work in progress. See issues.
