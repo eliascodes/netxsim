@@ -42,6 +42,7 @@ class BaseLogger(object):
             env : (SimPy.Environment) : Simulation environment
         """
         env.process(self.log(graph, env))
+        return self
 
     def log(self, graph, env):
         """Process for logging signals for each logging interval
@@ -73,8 +74,8 @@ class BaseLogger(object):
             self.__state__.append(data)
 
     def get_state(self, graph):
-        """Transforms the graph object at a given simulator time-step into the data-structure describing the state of the
-        simulator, then passed to `store_state`. Default behaviour is to simply return the graph object itself.
+        """Transforms the graph object at a given simulator time-step into the data-structure describing the state of
+        the simulator, then passed to `store_state`. Default behaviour is to simply return the graph object itself.
         Overwrite this method to alter the data-structure that gets passed to `store_state`.
 
         Args:
