@@ -6,3 +6,4 @@ dist
 .pickle
 
 _results
+.coverage
