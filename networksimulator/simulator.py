@@ -41,7 +41,7 @@ class BaseSimCase(object):
                 print(e)
             log.close()
 
-            #self.timestamp[grid.hash_grid_point(point)].append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
+            # self.timestamp[grid.hash_grid_point(point)].append(datetime.datetime.now().strftime('%Y%m%dT%H%M%S'))
 
         self.timestamp['end'] = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
 
@@ -81,4 +81,3 @@ class BaseSimCase(object):
             kwargs : (dict) : key-value pairs determining the grid point parameters
         """
         raise NotImplementedError
-
