@@ -11,3 +11,14 @@ packages for their work.
 
 ## Status
 Work in progress. See issues.
+
+
+## TODOs
+1. Add decent visualisation options:
+  * using NetworkX's native visualisation functions
+  * using pandas timeseries submodule
+2. Add some example simulations:
+  * Simple epidemiological simulation (one-shot)
+  * Simple epidemiological simulation (monte-carlo)
+  * More complex social network simulation (monte-carlo)
+3. More tests
